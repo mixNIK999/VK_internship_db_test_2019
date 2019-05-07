@@ -64,29 +64,29 @@ private:
     }
 };
 
-// Решение с хеш-таблицей. Считаем что 0 < minor.size() <= major.size().
-int count_intersection_by_hash(const vector<int> &minor, const vector<int> &major) {
+// Решение с хеш-таблицей. Считаем что 0 < smaller.size() <= larger.size().
+int count_intersection_by_hash(const vector<int> &smaller, const vector<int> &larger) {
     int ans = 0;
 
-    FastIntHashSet hash_set(2 * minor.size());
+    FastIntHashSet hash_set(2 * smaller.size());
 
-    for (auto e : minor) {
+    for (auto e : smaller) {
         hash_set.add(e);
     }
 
-    for (auto e : major) {
+    for (auto e : larger) {
         ans += hash_set.contains(e);
     }
     return ans;
 }
 
-// Простое решение. Считаем что 0 < minor.size() <= major.size().
-int count_intersection_by_find(const vector<int> &minor, const vector<int> &major) {
+// Простое решение. Считаем что 0 < smaller.size() <= larger.size().
+int count_intersection_by_find(const vector<int> &smaller, const vector<int> &larger) {
     int ans = 0;
 
     // Вложенность именно такая, так как маленький массив кэшируется процессором
-    for (auto e : major) {
-        ans += (find(begin(minor), end(minor), e) != end(minor));
+    for (auto e : larger) {
+        ans += (find(begin(smaller), end(smaller), e) != end(smaller));
     }
 
     return ans;
@@ -99,18 +99,18 @@ int count_intersection(const vector<int> &first_array, const vector<int> &second
         return 0;
     }
 
-    const vector<int> *minor_ptr = &first_array;
-    const vector<int> *major_ptr = &second_array;
-    if (minor_ptr->size() > major_ptr->size()) {
-        swap(minor_ptr, major_ptr);
+    const vector<int> *smaller_ptr = &first_array;
+    const vector<int> *larger_ptr = &second_array;
+    if (smaller_ptr->size() > larger_ptr->size()) {
+        swap(smaller_ptr, larger_ptr);
     }
 
     const size_t MIN_SIZE_FOR_HASH = 110; // подобрал
-    if(minor_ptr->size() < MIN_SIZE_FOR_HASH) {
-        return count_intersection_by_find(*minor_ptr, *major_ptr);
+    if(smaller_ptr->size() < MIN_SIZE_FOR_HASH) {
+        return count_intersection_by_find(*smaller_ptr, *larger_ptr);
     }
 
-    return count_intersection_by_hash(*minor_ptr, *major_ptr);
+    return count_intersection_by_hash(*smaller_ptr, *larger_ptr);
 }
 
 // Тесты
@@ -200,56 +200,56 @@ TEST_CASE("count_intersection unit tests", "[count_intersection]") {
     }
 
     SECTION("intersect small not equal not sort vectors") {
-        vector<int> minor = {-3, -2, -1, 0};
-        vector<int> major = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        vector<int> smaller = {-3, -2, -1, 0};
+        vector<int> larger = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-        random_shuffle(begin(minor), end(minor));
-        random_shuffle(begin(major), end(major));
+        random_shuffle(begin(smaller), end(smaller));
+        random_shuffle(begin(larger), end(larger));
 
-        REQUIRE(count_intersection(minor, major) == 2);
-        REQUIRE(count_intersection(major, minor) == 2);
-        REQUIRE(count_intersection_by_find(minor, major) == 2);
-        REQUIRE(count_intersection_by_hash(minor, major) == 2);
+        REQUIRE(count_intersection(smaller, larger) == 2);
+        REQUIRE(count_intersection(larger, smaller) == 2);
+        REQUIRE(count_intersection_by_find(smaller, larger) == 2);
+        REQUIRE(count_intersection_by_hash(smaller, larger) == 2);
     }
 
     SECTION("intersect big not equal not sort vectors") {
         int n = 1e4;
         int m = 1e5;
-        vector<int> minor(n);
-        vector<int> major(m);
+        vector<int> smaller(n);
+        vector<int> larger(m);
 
         for (int i = 0; i < n; i++) {
-            minor[i] = i - 10;
+            smaller[i] = i - 10;
         }
         for (int i = 0; i < m; i++) {
-            major[i] = 10 - i;
+            larger[i] = 10 - i;
         }
 
-        random_shuffle(begin(minor), end(minor));
-        random_shuffle(begin(major), end(major));
+        random_shuffle(begin(smaller), end(smaller));
+        random_shuffle(begin(larger), end(larger));
 
-        REQUIRE(count_intersection(minor, major) == 21);
-        REQUIRE(count_intersection(major, minor) == 21);
-        REQUIRE(count_intersection_by_find(minor, major) == 21);
-        REQUIRE(count_intersection_by_hash(minor, major) == 21);
+        REQUIRE(count_intersection(smaller, larger) == 21);
+        REQUIRE(count_intersection(larger, smaller) == 21);
+        REQUIRE(count_intersection_by_find(smaller, larger) == 21);
+        REQUIRE(count_intersection_by_hash(smaller, larger) == 21);
     }
 
     SECTION("intersect big and small vector") {
         int m = 1e6;
-        vector<int> minor = {-1, 0, 1, 2, 3, 40, 50, 60};
-        vector<int> major(m);
+        vector<int> smaller = {-1, 0, 1, 2, 3, 40, 50, 60};
+        vector<int> larger(m);
 
         for (int i = 0; i < m; i++) {
-            major[i] = 10 - i;
+            larger[i] = 10 - i;
         }
 
-        random_shuffle(begin(minor), end(minor));
-        random_shuffle(begin(major), end(major));
+        random_shuffle(begin(smaller), end(smaller));
+        random_shuffle(begin(larger), end(larger));
 
-        REQUIRE(count_intersection(minor, major) == 5);
-        REQUIRE(count_intersection(major, minor) == 5);
-        REQUIRE(count_intersection_by_find(minor, major) == 5);
-        REQUIRE(count_intersection_by_hash(minor, major) == 5);
+        REQUIRE(count_intersection(smaller, larger) == 5);
+        REQUIRE(count_intersection(larger, smaller) == 5);
+        REQUIRE(count_intersection_by_find(smaller, larger) == 5);
+        REQUIRE(count_intersection_by_hash(smaller, larger) == 5);
     }
 }
 
@@ -278,16 +278,16 @@ TEST_CASE("count_intersection stress", "[count_intersection][stress]") {
     SECTION("Small tests") {
         int number_of_tests = 1000;
         uniform_int_distribution<int> uid(-MAX, MAX);
-        vector<int> minor;
-        vector<int> major;
+        vector<int> smaller;
+        vector<int> larger;
         for (int t = 0; t < number_of_tests; t++) {
-            minor = generator(gen, uid, 10);
-            major = generator(gen, uid, 50);
+            smaller = generator(gen, uid, 10);
+            larger = generator(gen, uid, 50);
 
-            int by_hash = count_intersection_by_hash(minor, major);
-            int by_find = count_intersection_by_find(minor, major);
-            int main = count_intersection(minor, major);
-            int rev_main = count_intersection(major, minor);
+            int by_hash = count_intersection_by_hash(smaller, larger);
+            int by_find = count_intersection_by_find(smaller, larger);
+            int main = count_intersection(smaller, larger);
+            int rev_main = count_intersection(larger, smaller);
 
             REQUIRE(by_hash == by_find);
             REQUIRE(main == rev_main);
@@ -298,16 +298,16 @@ TEST_CASE("count_intersection stress", "[count_intersection][stress]") {
     SECTION("Big tests") {
         int number_of_tests = 50;
         uniform_int_distribution<int> uid(-MAX, MAX);
-        vector<int> minor;
-        vector<int> major;
+        vector<int> smaller;
+        vector<int> larger;
         for (int t = 0; t < number_of_tests; t++) {
-            minor = generator(gen, uid, 1000);
-            major = generator(gen, uid, 10000);
+            smaller = generator(gen, uid, 1000);
+            larger = generator(gen, uid, 10000);
 
-            int by_hash = count_intersection_by_hash(minor, major);
-            int by_find = count_intersection_by_find(minor, major);
-            int main = count_intersection(minor, major);
-            int rev_main = count_intersection(major, minor);
+            int by_hash = count_intersection_by_hash(smaller, larger);
+            int by_find = count_intersection_by_find(smaller, larger);
+            int main = count_intersection(smaller, larger);
+            int rev_main = count_intersection(larger, smaller);
 
             REQUIRE(by_hash == by_find);
             REQUIRE(main == rev_main);
@@ -318,16 +318,16 @@ TEST_CASE("count_intersection stress", "[count_intersection][stress]") {
     SECTION("Huge tests") {
         int number_of_tests = 10;
         uniform_int_distribution<int> uid(-MAX, MAX);
-        vector<int> minor;
-        vector<int> major;
+        vector<int> smaller;
+        vector<int> larger;
         for (int t = 0; t < number_of_tests; t++) {
-            minor = generator(gen, uid, 10000);
-            major = generator(gen, uid, 100000);
+            smaller = generator(gen, uid, 10000);
+            larger = generator(gen, uid, 100000);
 
-            int by_hash = count_intersection_by_hash(minor, major);
-            int by_find = count_intersection_by_find(minor, major);
-            int main = count_intersection(minor, major);
-            int rev_main = count_intersection(major, minor);
+            int by_hash = count_intersection_by_hash(smaller, larger);
+            int by_find = count_intersection_by_find(smaller, larger);
+            int main = count_intersection(smaller, larger);
+            int rev_main = count_intersection(larger, smaller);
 
             REQUIRE(by_hash == by_find);
             REQUIRE(main == rev_main);
@@ -338,16 +338,16 @@ TEST_CASE("count_intersection stress", "[count_intersection][stress]") {
     SECTION("Small and big vectors tests") {
         int number_of_tests = 50;
         uniform_int_distribution<int> uid(-MAX, MAX);
-        vector<int> minor;
-        vector<int> major;
+        vector<int> smaller;
+        vector<int> larger;
         for (int t = 0; t < number_of_tests; t++) {
-            minor = generator(gen, uid, 20);
-            major = generator(gen, uid, 100000);
+            smaller = generator(gen, uid, 20);
+            larger = generator(gen, uid, 100000);
 
-            int by_hash = count_intersection_by_hash(minor, major);
-            int by_find = count_intersection_by_find(minor, major);
-            int main = count_intersection(minor, major);
-            int rev_main = count_intersection(major, minor);
+            int by_hash = count_intersection_by_hash(smaller, larger);
+            int by_find = count_intersection_by_find(smaller, larger);
+            int main = count_intersection(smaller, larger);
+            int rev_main = count_intersection(larger, smaller);
 
             REQUIRE(by_hash == by_find);
             REQUIRE(main == rev_main);
@@ -380,15 +380,15 @@ TEST_CASE("count_intersection stress", "[count_intersection][stress]") {
 // }
 //
 //
-// int count_intersection_by_sort(const vector<int> &minor, const vector<int> &major) {
+// int count_intersection_by_sort(const vector<int> &smaller, const vector<int> &larger) {
 //     int ans = 0;
 //
-//     vector<int> minor_cp(minor);
-//     sort(begin(minor_cp), end(minor_cp));
+//     vector<int> smaller_cp(smaller);
+//     sort(begin(smaller_cp), end(smaller_cp));
 //
-//     for (auto e : major) {
-//         auto it = lower_bound(begin(minor_cp), end(minor_cp), e);
-//         ans +=  (it != end(major)) && (*it == e);
+//     for (auto e : larger) {
+//         auto it = lower_bound(begin(smaller_cp), end(smaller_cp), e);
+//         ans +=  (it != end(larger)) && (*it == e);
 //     }
 //
 //     return ans;
@@ -403,22 +403,22 @@ TEST_CASE("count_intersection stress", "[count_intersection][stress]") {
 //     SECTION("tests") {
 //         int number_of_tests = 100;
 //         uniform_int_distribution<int> uid(-MAX, MAX);
-//         vector<int> minor;
-//         vector<int> major;
+//         vector<int> smaller;
+//         vector<int> larger;
 //         for (int t = 0; t < number_of_tests; t++) {
-//             minor = generator(gen, uid, min_const);
-//             major = generator(gen, uid, 10000);
+//             smaller = generator(gen, uid, min_const);
+//             larger = generator(gen, uid, 10000);
 //
 //             StartCounter();
-//             int by_sort = count_intersection_by_sort(minor, major);
+//             int by_sort = count_intersection_by_sort(smaller, larger);
 //             double time_sort = GetCounter();
 //
 //             StartCounter();
-//             int by_find = count_intersection_by_find(minor, major);
+//             int by_find = count_intersection_by_find(smaller, larger);
 //             double time_find = GetCounter();
 //
 //             StartCounter();
-//             int by_hash = count_intersection_by_hash(minor, major);
+//             int by_hash = count_intersection_by_hash(smaller, larger);
 //             double time_hash = GetCounter();
 //
 //             REQUIRE(by_sort == by_find);
